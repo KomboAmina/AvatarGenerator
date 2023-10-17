@@ -6,9 +6,9 @@
 
 class AvatarGenerator{
 
-    public $randomizeBGColor=false;
+    public $randomizeBGColor=true;
 
-    public $randomizeDefaultInitials=true;
+    public $randomizeDefaultText=true;
 
     public $defaultInitials="Hi!";
 
@@ -18,21 +18,61 @@ class AvatarGenerator{
 
     private $minimumHeight=10;
 
-    private $maximumInitials=3;
+    private $maximumTextLength=3;
 
-    public function __construct(){
+    private $defaultBGColor=[0,0,0];
 
-        
+    private $defaultTextColor=[255,255,255];
+
+    private $defaultTextSize=140;
+
+    public function generateAvatarFromInitials($fullname,$width,$height){
+
+        $initials=$this->getInitials($fullname);
 
     }
 
-    public function generateAvatarFromName($fullname,$width,$height){
+    public function generateAvatarFromFirstLettersInName($fullname,$width,$height){
+
+        $letters=$this->getFirstLettersInName($fullname);
+
+    }
+
+    public function generateAvatar($text,$width,$height):object{
+
+        $text=(empty($text)) ? $this->getDefaultText():$text;
 
         $width=($width<$this->minimumWidth) ? $this->minimumWidth:$width;
 
         $height=($height<$this->minimumHeight) ? $this->minimumHeight:$height;
 
-        $initials=$this->getInitials($fullname);
+        //bgcolor
+        $bgColor=$this->getActiveBGColor();
+
+        //textcolor
+        //$textColor=$this->defaultTextColor;
+        $textColor=$this->getActiveTextColor($bgColor);
+
+        //font size
+        $textSize=$this->defaultTextSize;
+
+        //font color
+        $textColor=$this->defaultTextColor;
+
+        $image=@imagecreate($width,$height) or die("Cannot initialize GD image stream");
+
+        imagecolorallocate($image,$bgColor[0],$bgColor[1],$bgColor[2]);
+
+        $fontColor=imagecolorallocate($image,$textColor[0],$textColor[1],$textColor[2]);
+
+        $textBoundingBox=imagettfbbox($textSize,0,$this->activeFont,$text);
+
+        $y = abs(ceil(($height - $textBoundingBox[5]) / 2));
+        $x = abs(ceil(($width - $textBoundingBox[2]) / 2));
+
+        imagettftext($image, $textSize, 0, $x, $y, $fontColor, $this->activeFont, $text);
+
+        return $image;
 
     }
 
@@ -42,18 +82,15 @@ class AvatarGenerator{
 
         $names=explode(" ",$fullname);
 
-        $totalNames=count($names);
-
         if(empty($names)){
 
-            $initials=($this->randomizeDefaultInitials) ?
-            \StringGenerator::generateRandomCode($this->maximumInitials):$this->defaultInitials;
+            $initials=$this->getDefaultText();
 
         }
 
         else{
 
-            for($k=0;$k<$this->maximumInitials;$k++){
+            for($k=0;$k<$this->maximumTextLength;$k++){
 
                 if(isset($names[$k])){
 
@@ -66,6 +103,65 @@ class AvatarGenerator{
         }
 
         return $initials;
+
+    }
+
+    private function getFirstLettersInName($fullname){
+
+        $letters="";
+
+        //only alphanumeric characters and no spaces allowed.
+        $fullname=preg_replace("/[^A-Za-z0-9]/", '', $fullname);
+
+        if(empty($fullname)){
+
+            $letters=$this->getDefaultText();
+
+        }
+
+        else{
+
+            for($k=0;$k<$this->maximumTextLength;$k++){
+
+                if(isset($fullname[$k])){
+
+                    if(strlen($letters)<$this->maximumTextLength){
+
+                        $letters.=$fullname[$k];
+
+                    }
+                    else{
+
+                        break;
+
+                    }
+
+                }
+
+            }
+
+        }
+
+        return $letters;
+
+    }
+
+    private function getDefaultText():string{
+
+        return ($this->randomizeDefaultText) ?
+        \StringGenerator::generateCode($this->maximumTextLength):$this->defaultInitials;
+
+    }
+
+    private function getActiveBGColor():array{
+
+        return ($this->randomizeBGColor) ? [mt_rand(0,255),mt_rand(0,255),mt_rand(0,255)]:$this->defaultBGColor;
+
+    }
+
+    private function getActiveTextColor($bgColor=array()):array{
+
+        return $this->defaultTextColor;
 
     }
 
