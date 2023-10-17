@@ -8,13 +8,13 @@ include_once "src".DS."AvatarGenerator.php";
 
 $avv=new AvatarGenerator();
 
-$name="";
+$name="Mina Kaj Tiel Plu";
 
-$width=mt_rand(100,750);
+$width=mt_rand(100,650);
 
 $height=$width;
 
-$img=$avv->generateAvatar($name,$width,$height);
+$img=$avv->generateAvatarFromFirstLettersInName($name,$width,$height);
 
 ob_start();
 imagepng($img);

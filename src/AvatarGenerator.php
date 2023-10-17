@@ -14,6 +14,8 @@ class AvatarGenerator{
 
     public $activeFont='./src/OdudoMono-Bold.ttf';
 
+    public $dynamicTextSize=true;
+
     private $minimumWidth=10;
 
     private $minimumHeight=10;
@@ -22,19 +24,17 @@ class AvatarGenerator{
 
     private $defaultBGColor=[0,0,0];
 
-    private $defaultTextColor=[255,255,255];
-
     private $defaultTextSize=140;
 
     public function generateAvatarFromInitials($fullname,$width,$height){
 
-        $initials=$this->getInitials($fullname);
+       return $this->generateAvatar($this->getInitials($fullname),$width,$height);
 
     }
 
     public function generateAvatarFromFirstLettersInName($fullname,$width,$height){
 
-        $letters=$this->getFirstLettersInName($fullname);
+        return $this->generateAvatar($this->getFirstLettersInName($fullname),$width,$height);
 
     }
 
@@ -46,14 +46,12 @@ class AvatarGenerator{
 
         $height=($height<$this->minimumHeight) ? $this->minimumHeight:$height;
 
-        //bgcolor
         $bgColor=$this->getActiveBGColor();
 
-        //textcolor
         $textColor=$this->getActiveTextColor($bgColor);
 
-        //font size
-        $textSize=$this->defaultTextSize;
+        $calculateFrom=($width<=$height) ? $width:$height;
+        $textSize=$this->getActiveTextSize($calculateFrom);
 
         $image=@imagecreate($width,$height) or die("Cannot initialize GD image stream");
 
@@ -72,7 +70,7 @@ class AvatarGenerator{
 
     }
 
-    private function getInitials($fullname):string{
+    public function getInitials($fullname):string{
 
         $initials="";
 
@@ -102,7 +100,7 @@ class AvatarGenerator{
 
     }
 
-    private function getFirstLettersInName($fullname){
+    public function getFirstLettersInName($fullname){
 
         $letters="";
 
@@ -159,17 +157,23 @@ class AvatarGenerator{
 
         $rgb=implode("",$bgColor);
 
-        $hsl=$this->RGBTOHSL($rgb);
+        $hsl=$this->convertRGBToHSL($rgb);
 
         return ($hsl->lightness<200) ? [0,0,0]:[255,255,255];
 
     }
 
+    private function getActiveTextSize($baseWidth=0):float{
+
+        return ($this->dynamicTextSize) ? $baseWidth/(2*1.618):$this->defaultTextSize;
+
+    }
+
     /**
-     * unchanged from accepted answer on this page:
+     * contents unchanged from accepted answer on this page:
      * https://stackoverflow.com/questions/12228644/how-to-detect-light-colors-with-php
      */
-    private function RGBToHSL($RGB) {
+    private function convertRGBToHSL($RGB) {
         $r = 0xFF & ($RGB >> 0x10);
         $g = 0xFF & ($RGB >> 0x8);
         $b = 0xFF & $RGB;
@@ -217,7 +221,7 @@ class AvatarGenerator{
 
     /**unchanged from this tutorial:
      * https://dev.to/thinkverse/creating-default-user-initial-avatars-in-php-7-1gf1 */
-    function createDefaultAvatar(
+    private function createDefaultAvatar(
         string $text = 'DEV',
         array $bgColor = [0, 0, 0],
         array $textColor = [255, 255, 255],
