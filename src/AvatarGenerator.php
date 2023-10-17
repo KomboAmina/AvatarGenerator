@@ -1,6 +1,7 @@
 <?php
 /**
  * @author Amina Kombo <https://aminakombo.work>
+ * requires the StringGenerator class to generate random text: https://github.com/KomboAmina/Uzi2.1
  * references this tutorial: https://dev.to/thinkverse/creating-default-user-initial-avatars-in-php-7-1gf1
  */
 
