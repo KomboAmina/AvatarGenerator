@@ -6,44 +6,19 @@ include_once "src".DS."StringGenerator.php";
 
 include_once "src".DS."AvatarGenerator.php";
 
-if(isset($_GET['show'])){
+$avv=new AvatarGenerator();
 
-    //show generated image
+$name="";
 
-}
-else{
+$width=mt_rand(100,750);
 
-    //show form
+$height=$width;
 
-    $avv=new AvatarGenerator();
+$img=$avv->generateAvatar($name,$width,$height);
 
-    $name="S huprella Prella Pais";
+ob_start();
+imagepng($img);
+$png=ob_get_clean();
+$uri = "data:image/png;base64," . base64_encode($png);
 
-    $img=$avv->generateAvatar('',500,500);
-
-    ob_start();
-    imagepng($img);
-    $png=ob_get_clean();
-    $uri = "data:image/png;base64," . base64_encode($png);
-
-    echo "<img src='".$uri."' />";
-
-    /*
-    $img = $avv->createDefaultAvatar(mt_rand(10,99)."");
-
-    ob_start();
-    imagepng($img);
-    $png=ob_get_clean();
-    $uri = "data:image/png;base64," . base64_encode($png);
-
-    echo "<img src='".$uri."' />";*/
-
-
-    /*
-    header("Content-Type: image/png");
-
-    imagepng($img);
-    imagedestroy($img);*/
-
-}
-
+echo "<img src='".$uri."' />";

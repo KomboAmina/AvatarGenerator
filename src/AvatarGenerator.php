@@ -38,7 +38,7 @@ class AvatarGenerator{
 
     }
 
-    public function generateAvatar($text,$width,$height):object{
+    public function generateAvatar($text="",$width=0,$height=0):object{
 
         $text=(empty($text)) ? $this->getDefaultText():$text;
 
@@ -50,14 +50,10 @@ class AvatarGenerator{
         $bgColor=$this->getActiveBGColor();
 
         //textcolor
-        //$textColor=$this->defaultTextColor;
         $textColor=$this->getActiveTextColor($bgColor);
 
         //font size
         $textSize=$this->defaultTextSize;
-
-        //font color
-        $textColor=$this->defaultTextColor;
 
         $image=@imagecreate($width,$height) or die("Cannot initialize GD image stream");
 
@@ -161,8 +157,62 @@ class AvatarGenerator{
 
     private function getActiveTextColor($bgColor=array()):array{
 
-        return $this->defaultTextColor;
+        $rgb=implode("",$bgColor);
 
+        $hsl=$this->RGBTOHSL($rgb);
+
+        return ($hsl->lightness<200) ? [0,0,0]:[255,255,255];
+
+    }
+
+    /**
+     * unchanged from accepted answer on this page:
+     * https://stackoverflow.com/questions/12228644/how-to-detect-light-colors-with-php
+     */
+    private function RGBToHSL($RGB) {
+        $r = 0xFF & ($RGB >> 0x10);
+        $g = 0xFF & ($RGB >> 0x8);
+        $b = 0xFF & $RGB;
+    
+        $r = ((float)$r) / 255.0;
+        $g = ((float)$g) / 255.0;
+        $b = ((float)$b) / 255.0;
+    
+        $maxC = max($r, $g, $b);
+        $minC = min($r, $g, $b);
+    
+        $l = ($maxC + $minC) / 2.0;
+    
+        if($maxC == $minC)
+        {
+          $s = 0;
+          $h = 0;
+        }
+        else
+        {
+          if($l < .5)
+          {
+            $s = ($maxC - $minC) / ($maxC + $minC);
+          }
+          else
+          {
+            $s = ($maxC - $minC) / (2.0 - $maxC - $minC);
+          }
+          if($r == $maxC)
+            $h = ($g - $b) / ($maxC - $minC);
+          if($g == $maxC)
+            $h = 2.0 + ($b - $r) / ($maxC - $minC);
+          if($b == $maxC)
+            $h = 4.0 + ($r - $g) / ($maxC - $minC);
+    
+          $h = $h / 6.0; 
+        }
+    
+        $h = (int)round(255.0 * $h);
+        $s = (int)round(255.0 * $s);
+        $l = (int)round(255.0 * $l);
+    
+        return (object) Array('hue' => $h, 'saturation' => $s, 'lightness' => $l);
     }
 
     /**unchanged from this tutorial:
